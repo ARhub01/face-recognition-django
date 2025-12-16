@@ -1,0 +1,31 @@
+project:
+  name: Face Recognition Django System
+  version: 1.0
+
+paths:
+  raw_data: data/lfw
+  processed_data: data/processed
+  uploads: data/uploads
+  models: models/
+  logs: logs/
+
+face_detection:
+  method: haarcascade
+  haarcascade_path: models/haarcascade_frontalface_default.xml
+  image_size: 224
+
+model:
+  backbone: MobileNetV2
+  embedding_dim: 128
+  weights: imagenet
+  trainable: false
+
+training:
+  batch_size: 32
+  epochs: 15
+  learning_rate: 0.0001
+  validation_split: 0.2
+
+recognition:
+  similarity: cosine
+  threshold: 0.5

@@ -1,0 +1,2 @@
+2025-12-15 21:31:19,783 | INFO | INFERENCE | Embedding model loaded from D:\Projects\MLProjects\face-recognition-django\models/embedding_model.h5
+2025-12-15 21:31:19,787 | INFO | INFERENCE | Loaded 2 known embeddings

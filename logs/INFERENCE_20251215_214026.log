@@ -1,0 +1,3 @@
+2025-12-15 21:40:28,045 | INFO | INFERENCE | Embedding model loaded from D:\Projects\MLProjects\face-recognition-django\models/embedding_model.h5
+2025-12-15 21:40:28,048 | INFO | INFERENCE | Loaded 2 known embeddings
+2025-12-15 21:40:28,049 | WARNING | INFERENCE | Test image not found at D:\Projects\MLProjects\face-recognition-django\data/lfw/ID_photo.jpg

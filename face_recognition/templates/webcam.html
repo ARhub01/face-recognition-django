@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Live Webcam Recognition</h2>
+<img src="{% url 'video_feed' %}" width="720" height="560">
+<p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
+{% endblock %}

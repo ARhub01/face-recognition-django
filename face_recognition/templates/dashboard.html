@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+{% if images %}
+    <div style="display:flex; flex-wrap: wrap; gap: 20px;">
+        {% for image in images %}
+        <div style="border: 1px solid #ccc; padding: 10px; width: 250px;">
+            {% if image.image %}
+                <img src="{{ image.image.url }}" alt="Uploaded Image" style="width: 100%; height: auto; display:block; margin-bottom:10px;">
+            {% endif %}
+            <p><strong>Predicted:</strong> {{ image.predicted_label }}</p>
+            <p><strong>Confidence:</strong> {{ image.confidence|floatformat:2 }}</p>
+            <p><strong>Uploaded At:</strong> {{ image.created_at|date:"Y-m-d H:i" }}</p>
+            <p><strong>Expression:</strong> {{ image.emotion|default:"Unknown" }}</p>
+            <p><strong>Expression Confidence:</strong> {{ image.emotion_conf|default:"0.0"|floatformat:2 }}</p>
+
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No images uploaded yet.</p>
+{% endif %}
+
+<p style="margin-top:20px;"><a href="{% url 'upload_image' %}">Upload New Image</a></p>
+<p><a href="{% url 'webcam_view' %}">Open Webcam Recognition</a></p>
+{% endblock %}
