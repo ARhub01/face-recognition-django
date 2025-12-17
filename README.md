@@ -8,6 +8,11 @@ A **Django-based web application** for **face recognition** and **emotion detect
 Users can upload images or use a webcam to detect faces, identify known users, and recognize emotions.
 
 ---
+> ⚠️ Project Status: Ongoing academic project  
+> This repository represents an active research-oriented system development in computer vision and deep learning.
+
+## Note on Models
+Pretrained models (ArcFace, Emo0.1) are used to study system integration, inference pipelines, and deployment challenges rather than to claim novel model contributions.
 
 ## 🔹 Features
 - User registration & login system

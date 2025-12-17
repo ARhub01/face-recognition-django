@@ -20,3 +20,12 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
+db.sqlite3
+
+data/
+models/
+media/
+logs/
+*.h5
+*.pt
+*.pth
