@@ -1,17 +1,52 @@
 {% extends "base.html" %}
+
+{% block title %}Upload | Face Recognition v1.1{% endblock %}
+
 {% block content %}
-<h2>Upload Image</h2>
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Image recognition</p>
+        <h1>Upload Image</h1>
+    </div>
+    <a class="secondary-action" href="{% url 'dashboard' %}">Back</a>
+</section>
 
-<form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Upload</button>
-</form>
+<section class="upload-layout">
+    <form class="upload-panel" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label class="file-input">
+            <span>Choose an image</span>
+            {{ form.image }}
+            {{ form.image.errors }}
+        </label>
+        <button class="primary-action" type="submit">Analyze Image</button>
+    </form>
 
-{% if processed_image_url %}
-    <h3>Recognition Result:</h3>
-    <img src="{{ processed_image_url }}" alt="Processed Image" style="width:400px; height:auto; margin-top:10px;">
+    <div class="processed-panel">
+        {% if processed_image_url %}
+            <img src="{{ processed_image_url }}" alt="Processed recognition result">
+        {% else %}
+            <div class="placeholder">
+                <span>Result preview</span>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if extracted_faces %}
+    <section class="face-strip">
+        {% for face in extracted_faces %}
+            <article class="face-chip">
+                {% if face.face_image_url %}
+                    <img src="{{ face.face_image_url }}" alt="Extracted detected face">
+                {% endif %}
+                <div>
+                    <strong>{{ face.emotion|default:"Unknown" }}</strong>
+                    <span>{{ face.display_label|default:face.label }} - {{ face.emotion_conf|floatformat:2 }}</span>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
 {% endif %}
-
-<p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
 {% endblock %}

@@ -9,6 +9,7 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(next_page="login"), name="logout"),
     path("", views.dashboard, name="dashboard"),
     path("upload/", views.upload_image, name="upload_image"),
+    path("images/<int:image_id>/delete/", views.delete_image, name="delete_image"),
     path("webcam/", views.webcam_view, name="webcam_view"),
     path("video_feed/", views.video_feed, name="video_feed"),
     path("api/recognize/", FaceRecognitionAPI.as_view(), name="api_recognize"),

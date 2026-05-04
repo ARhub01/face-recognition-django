@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 import yaml
 
-# Get absolute project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -12,6 +11,21 @@ def load_config(config_path=None):
         config_path = os.path.join(PROJECT_ROOT, "configs/config.yaml")
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
+
+
+def project_path(*parts):
+    return os.path.join(PROJECT_ROOT, *parts)
+
+
+def config_path(config, dotted_key, default=None):
+    current = config
+    for key in dotted_key.split("."):
+        if not isinstance(current, dict) or key not in current:
+            return default
+        current = current[key]
+    if isinstance(current, str) and not os.path.isabs(current):
+        return os.path.join(PROJECT_ROOT, current)
+    return current
 
 
 def setup_logger(name, log_dir=None, level=logging.INFO):
@@ -30,13 +44,13 @@ def setup_logger(name, log_dir=None, level=logging.INFO):
         "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
     )
 
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setFormatter(formatter)
-
-    stream_handler = logging.StreamHandler()
-    stream_handler.setFormatter(formatter)
-
     if not logger.handlers:
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(formatter)
+
+        stream_handler = logging.StreamHandler()
+        stream_handler.setFormatter(formatter)
+
         logger.addHandler(file_handler)
         logger.addHandler(stream_handler)
 

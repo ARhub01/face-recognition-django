@@ -1,28 +1,90 @@
 {% extends "base.html" %}
 
+{% block title %}Dashboard | Face Recognition v1.1{% endblock %}
+
 {% block content %}
-<h2>Dashboard</h2>
+<section class="page-heading">
+    <div>
+        <p class="eyebrow">Recognition history</p>
+        <h1>Dashboard</h1>
+    </div>
+    <a class="primary-action" href="{% url 'upload_image' %}">Upload Image</a>
+</section>
+
+<section class="metrics">
+    <div>
+        <span>{{ images|length }}</span>
+        <small>Uploads</small>
+    </div>
+    <div>
+        <span>{{ total_faces }}</span>
+        <small>Faces detected</small>
+    </div>
+    <div>
+        <span>{{ known_faces }}</span>
+        <small>Known matches</small>
+    </div>
+</section>
 
 {% if images %}
-    <div style="display:flex; flex-wrap: wrap; gap: 20px;">
+    <section class="gallery">
         {% for image in images %}
-        <div style="border: 1px solid #ccc; padding: 10px; width: 250px;">
-            {% if image.image %}
-                <img src="{{ image.image.url }}" alt="Uploaded Image" style="width: 100%; height: auto; display:block; margin-bottom:10px;">
-            {% endif %}
-            <p><strong>Predicted:</strong> {{ image.predicted_label }}</p>
-            <p><strong>Confidence:</strong> {{ image.confidence|floatformat:2 }}</p>
-            <p><strong>Uploaded At:</strong> {{ image.created_at|date:"Y-m-d H:i" }}</p>
-            <p><strong>Expression:</strong> {{ image.emotion|default:"Unknown" }}</p>
-            <p><strong>Expression Confidence:</strong> {{ image.emotion_conf|default:"0.0"|floatformat:2 }}</p>
-
-        </div>
+            <article class="result-card">
+                <div class="preview">
+                    {% if image.processed_image %}
+                        <img src="{{ image.processed_image.url }}" alt="Processed recognition result">
+                    {% elif image.image %}
+                        <img src="{{ image.image.url }}" alt="Uploaded image">
+                    {% endif %}
+                </div>
+                <div class="result-body">
+                    <div class="result-title">
+                        <h2>{{ image.predicted_label|default:user.username }}</h2>
+                        <span>{{ image.confidence|floatformat:2 }}</span>
+                    </div>
+                    <dl>
+                        <div>
+                            <dt>User</dt>
+                            <dd>{{ user.get_full_name|default:user.username }} | ID {{ user.id }}</dd>
+                        </div>
+                        <div>
+                            <dt>Emotion</dt>
+                            <dd>{{ image.emotion|default:"Unknown" }} ({{ image.emotion_conf|floatformat:2 }})</dd>
+                        </div>
+                        <div>
+                            <dt>Faces</dt>
+                            <dd>{{ image.face_count }}</dd>
+                        </div>
+                        <div>
+                            <dt>Uploaded</dt>
+                            <dd>{{ image.created_at|date:"Y-m-d H:i" }}</dd>
+                        </div>
+                    </dl>
+                    {% if image.results_json %}
+                        <div class="mini-faces">
+                            {% for face in image.results_json %}
+                                {% if face.face_image_url %}
+                                    <div>
+                                        <img src="{{ face.face_image_url }}" alt="Extracted detected face">
+                                        <span>{{ face.emotion|default:"Unknown" }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <form class="delete-form" method="post" action="{% url 'delete_image' image.id %}">
+                        {% csrf_token %}
+                        <button class="delete-button" type="submit">Delete</button>
+                    </form>
+                </div>
+            </article>
         {% endfor %}
-    </div>
+    </section>
 {% else %}
-    <p>No images uploaded yet.</p>
+    <section class="empty-state">
+        <h2>No uploads yet</h2>
+        <p>Upload a clear face image to create your first recognition result.</p>
+        <a class="primary-action" href="{% url 'upload_image' %}">Upload Image</a>
+    </section>
 {% endif %}
-
-<p style="margin-top:20px;"><a href="{% url 'upload_image' %}">Upload New Image</a></p>
-<p><a href="{% url 'webcam_view' %}">Open Webcam Recognition</a></p>
 {% endblock %}

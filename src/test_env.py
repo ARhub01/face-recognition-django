@@ -1,4 +1,4 @@
-from utils import load_config, setup_logger
+from src.utils import load_config, setup_logger
 
 config = load_config()
 logger = setup_logger("PHASE0_TEST")

@@ -1,98 +1,59 @@
-# Face Recognition & Emotion Detection Web App
+# Face Recognition Django System v1.1
 
-[![Python](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/django-5.2.9-green)](https://www.djangoproject.com/)
-[![TensorFlow](https://img.shields.io/badge/tensorflow-2.15-orange)](https://www.tensorflow.org/)
+A Django web app for face recognition, emotion detection, image upload history, webcam streaming, and JSON API recognition.
 
-A **Django-based web application** for **face recognition** and **emotion detection** using deep learning and computer vision.  
-Users can upload images or use a webcam to detect faces, identify known users, and recognize emotions.
+## What is improved in v1.1
 
----
-> ⚠️ Project Status: Ongoing academic project  
-> This repository represents an active research-oriented system development in computer vision and deep learning.
+- Cleaner Django settings, URL routing, templates, and static styling.
+- Uploads now keep the original image and save a separate processed result image.
+- Recognition results are saved as structured JSON, including face count, labels, confidence, emotion, and bounding boxes.
+- The recognizer is cached so heavy AI models are not rebuilt for every request.
+- MTCNN, InsightFace, FAISS, and Hugging Face emotion detection now fail gracefully with local fallbacks instead of crashing the app.
+- Dataset loading and embedding generation now support one folder per person.
+- Added upload tests for result saving and no-face handling.
 
-## Note on Models
-Pretrained models (ArcFace, Emo0.1) are used to study system integration, inference pipelines, and deployment challenges rather than to claim novel model contributions.
+## Setup
 
-## 🔹 Features
-- User registration & login system
-- Upload images for face recognition
-- Detect multiple faces per image
-- Predict identity using **ArcFace embeddings**
-- Emotion recognition using **Emo0.1 (Hugging Face)**
-- Real-time webcam face recognition and emotion detection
-- Face indexing & search using **FAISS**
-- Supports multiple face alignment and embedding storage
+Python 3.11 is recommended for the full ML stack. Newer Python versions can still run the Django app, but some optional AI packages may be skipped and the safe fallback recognizers will be used.
 
----
-
-## 🛠 Installation
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/username/face-recognition-django.git
-cd face-recognition-django
-Create a virtual environment
-
-bash
-Copy code
+```powershell
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
-# Linux/macOS
-source .venv/bin/activate
-Install dependencies
-
-bash
-Copy code
+.\.venv\Scripts\activate
 pip install -r requirements.txt
-Run database migrations
-
-bash
-Copy code
-python manage.py makemigrations
 python manage.py migrate
-Run the Django server
-
-bash
-Copy code
 python manage.py runserver
-Access the web app
+```
 
-Image upload: http://127.0.0.1:8000/upload/
+Open the app at:
 
-Real-time webcam: http://127.0.0.1:8000/webcam/
+- Dashboard: http://127.0.0.1:8000/
+- Upload: http://127.0.0.1:8000/upload/
+- Webcam: http://127.0.0.1:8000/webcam/
+- API: http://127.0.0.1:8000/api/recognize/
 
-📁 Project Structure
-bash
-Copy code
-face_recognition-django/
-├─ face_recognition/          # Django app (views, models, forms, templates)
-├─ src/                       # ML/AI pipeline
-│  ├─ detection/              # Face detectors (MTCNN, InsightFace)
-│  ├─ alignment/              # Face alignment utilities
-│  ├─ embeddings/             # ArcFace embeddings + Emo0.1
-│  ├─ indexing/               # FAISS face index
-├─ media/                      # Uploaded & processed images
-├─ manage.py
-├─ requirements.txt
-└─ README.md
-⚙ Usage
-Upload Image: Detect faces, identify users, and predict emotions.
+## Training Data
 
-Webcam Feed: Real-time recognition with bounding boxes, labels, and emotion display.
+Put known-person images in this format:
 
-Sample Output:
+```text
+data/lfw/
+  person1/
+    image1.jpg
+    image2.jpg
+  person2/
+    image1.jpg
+```
 
-Detected Faces	Predicted Identity	Emotion
-✅	Ahmad Raza	Happy
-✅	Unknown	Neutral
+Then rebuild embeddings:
 
-🚀 Future Enhancements
-Train on custom face datasets
+```powershell
+python -m src.generate_embeddings_v2 --data-dir data/lfw --output data/processed/processed_embeddings.npz
+```
 
-Improve emotion recognition accuracy
+## API Example
 
-Add multi-user embedding management
+```powershell
+curl -X POST -F "image=@sample.jpg" http://127.0.0.1:8000/api/recognize/
+```
 
-Deploy on cloud with HTTPS support
+The response includes `face_count` and a `results` list with bounding boxes, predicted labels, confidence scores, emotions, and emotion confidence.

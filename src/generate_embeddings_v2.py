@@ -1,53 +1,72 @@
 import os
 import numpy as np
+import argparse
 from src.embeddings.arcface_embedder import ArcFaceEmbedder
 from src.detection.mtcnn_detector import MTCNNDetector
 from src.alignment.face_alignment import align_face
+from src.utils import config_path, load_config, PROJECT_ROOT
 import cv2
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DATA_DIR = os.path.join(PROJECT_ROOT, "data", "uploads")
-OUTPUT_FILE = os.path.join(PROJECT_ROOT, "data", "processed_embeddings.npz")
 
-os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+def build_embeddings(data_dir=None, output_file=None):
+    config = load_config()
+    data_dir = data_dir or config_path(config, "paths.raw_data", os.path.join(PROJECT_ROOT, "data", "lfw"))
+    output_file = output_file or config_path(
+        config,
+        "paths.embeddings",
+        os.path.join(PROJECT_ROOT, "data", "processed", "processed_embeddings.npz"),
+    )
 
-detector = MTCNNDetector()
-embedder = ArcFaceEmbedder()
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
-embeddings = []
-labels = []
+    detector = MTCNNDetector()
+    embedder = ArcFaceEmbedder()
 
-for img_file in os.listdir(DATA_DIR):
-    img_path = os.path.join(DATA_DIR, img_file)
-    if not os.path.isfile(img_path):
-        continue
+    embeddings = []
+    labels = []
 
-    label = os.path.splitext(img_file)[0]
+    for root, _, files in os.walk(data_dir):
+        label = os.path.basename(root)
+        if label == os.path.basename(data_dir):
+            label = None
 
-    try:
-        image = cv2.imread(img_path)
-        if image is None:
-            print(f"Warning: cannot read {img_path}")
-            continue
+        for img_file in files:
+            img_path = os.path.join(root, img_file)
+            current_label = label or os.path.splitext(img_file)[0]
 
-        faces = detector.detect(image)
-        if len(faces) == 0:
-            print(f"No face found in {img_path}")
-            continue
+            try:
+                image = cv2.imread(img_path)
+                if image is None:
+                    print(f"Warning: cannot read {img_path}")
+                    continue
 
-        face = faces[0]
-        face_img = align_face(image, face["keypoints"])
+                faces = detector.detect(image)
+                if len(faces) == 0:
+                    print(f"No face found in {img_path}")
+                    continue
 
-        emb = embedder.embed(face_img)
-        if emb is not None:
-            embeddings.append(emb)
-            labels.append(label)
+                face = faces[0]
+                face_img = align_face(image, face.get("keypoints", {}), face.get("box"))
 
-    except Exception as e:
-        print(f"Error processing {img_path}: {e}")
+                emb = embedder.embed(face_img)
+                if emb is not None:
+                    embeddings.append(emb)
+                    labels.append(current_label)
 
-embeddings = np.array(embeddings)
-labels = np.array(labels)
+            except Exception as e:
+                print(f"Error processing {img_path}: {e}")
 
-np.savez(OUTPUT_FILE, embeddings=embeddings, labels=labels)
-print(f"Saved embeddings: {OUTPUT_FILE}, shape={embeddings.shape}")
+    embeddings = np.array(embeddings)
+    labels = np.array(labels)
+
+    np.savez(output_file, embeddings=embeddings, labels=labels)
+    print(f"Saved embeddings: {output_file}, shape={embeddings.shape}")
+    return output_file, embeddings.shape
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate face embeddings for recognition")
+    parser.add_argument("--data-dir", default=None, help="Folder with one subfolder per person")
+    parser.add_argument("--output", default=None, help="Output .npz path")
+    args = parser.parse_args()
+    build_embeddings(args.data_dir, args.output)

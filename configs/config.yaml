@@ -1,6 +1,6 @@
 project:
   name: Face Recognition Django System
-  version: 1.0
+  version: 1.1
 
 paths:
   raw_data: data/lfw
@@ -8,16 +8,19 @@ paths:
   uploads: data/uploads
   models: models/
   logs: logs/
+  embeddings: data/processed/processed_embeddings.npz
+  faiss_index: models/faiss.index
+  faiss_labels: models/faiss_labels.pkl
 
 face_detection:
-  method: haarcascade
+  method: mtcnn
   haarcascade_path: models/haarcascade_frontalface_default.xml
   image_size: 224
 
 model:
-  backbone: MobileNetV2
-  embedding_dim: 128
-  weights: imagenet
+  backbone: ArcFace
+  embedding_dim: 512
+  weights: pretrained
   trainable: false
 
 training:
@@ -29,3 +32,7 @@ training:
 recognition:
   similarity: cosine
   threshold: 0.5
+
+emotion:
+  enabled: true
+  model: arpanghoshal/Emo0.1

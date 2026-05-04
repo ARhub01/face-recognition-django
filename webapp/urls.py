@@ -5,8 +5,8 @@ from django.conf.urls.static import static
 
 BASE_DIR = settings.BASE_DIR
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('face_recognition.urls')),
+    path("admin/", admin.site.urls),
+    path("", include("face_recognition.urls")),
 ]
 
 if settings.DEBUG:

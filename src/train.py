@@ -1,7 +1,7 @@
 import os
 from src.utils import load_config, setup_logger, PROJECT_ROOT
-from model import create_embedding_model
-from dataset import FaceDataset
+from src.model import create_embedding_model
+from src.dataset import FaceDataset
 import tensorflow as tf
 
 # Load config
@@ -12,9 +12,6 @@ logger = setup_logger("TRAIN", log_dir=os.path.join(PROJECT_ROOT, "logs"))
 
 
 def train_model():
-    # -----------------------------
-    # 1️⃣ Load Dataset
-    # -----------------------------
     dataset = FaceDataset(data_dir=os.path.join(PROJECT_ROOT, "data/processed"))
     X, y, label_encoder = dataset.load_data()
 
@@ -29,9 +26,6 @@ def train_model():
         3,
     )
 
-    # -----------------------------
-    # 2️⃣ Create Embedding Model
-    # -----------------------------
     embedding_model = create_embedding_model(
         input_shape=input_shape,
         embedding_dim=config["model"]["embedding_dim"],
@@ -39,9 +33,6 @@ def train_model():
         trainable=config["model"]["trainable"],
     )
 
-    # -----------------------------
-    # 3️⃣ Functional API for Classification
-    # -----------------------------
     inputs = tf.keras.Input(shape=input_shape)
     embeddings = embedding_model(inputs)
     outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(embeddings)
@@ -57,16 +48,10 @@ def train_model():
 
     full_model.summary()
 
-    # -----------------------------
-    # 4️⃣ Prepare Checkpoints
-    # -----------------------------
     checkpoints_dir = os.path.join(PROJECT_ROOT, "models/checkpoints")
     os.makedirs(checkpoints_dir, exist_ok=True)
     checkpoint_path = os.path.join(checkpoints_dir, "face_model_{epoch:02d}.h5")
 
-    # -----------------------------
-    # 5️⃣ Train
-    # -----------------------------
     logger.info("Starting training...")
     history = full_model.fit(
         X,
@@ -84,9 +69,6 @@ def train_model():
         ],
     )
 
-    # -----------------------------
-    # 6️⃣ Save Final Model
-    # -----------------------------
     final_model_path = os.path.join(PROJECT_ROOT, "models/embedding_model.h5")
     full_model.save(final_model_path)
     logger.info(f"Training completed. Model saved at {final_model_path}")
